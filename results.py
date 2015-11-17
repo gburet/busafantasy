@@ -4,12 +4,15 @@
 import os
 import argparse
 import colorama
+import BeautifulSoup as bs
+from requests import session
 
 ######### PLACE YOUR CONFIG HERE ##########
 
 RES_FILE    = "/home/gburet/.fantasy/res.txt"
 PLAYER_NAME = "The Answer"
-
+EMAIL = ""
+PASSWORD = ""
 
 ######### END OF CONFIG - START CODE ##########
 
@@ -47,7 +50,7 @@ def print_players(players):
         if player == PLAYER_NAME:
             res = BACK_CYAN + res + ENDC
         else:
-            res += diff_score(RESULTS[player], RESULTS[PLAYER_NAME]) 
+            res += diff_score(RESULTS[player], RESULTS[PLAYER_NAME])
         info += res.ljust(LINE_LEN-2+2*6) + BACK_BLUE + ' ' + ENDC
 
         print info
@@ -62,7 +65,7 @@ def print_players_and_evolution(players, dico):
         if player == PLAYER_NAME:
             res = BACK_CYAN + res + ENDC
         else:
-            res += diff_score(dico[player], dico[PLAYER_NAME]) 
+            res += diff_score(dico[player], dico[PLAYER_NAME])
         res += "   (+{})".format(dico[player]-RESULTS[player])
         info += res.ljust(LINE_LEN-2+2*6) + BACK_BLUE + ' ' + ENDC
 
@@ -93,9 +96,37 @@ def save_results(dico):
     else:
         print "results not saved"
 
+def get_results_from_busa():
+    """
+        Get teams, rankings, points from busa
+        Return a dict
+    """
+
+    payload = {'logmod': '1',
+               'FrmEma': EMAIL,
+               'FrmPas': PASSWORD}
+
+    with session() as c_session:
+        c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
+        response = c_session.get('http://fantasy.2ics.net/asp/mai_ligues/lig_fic.asp?ligid=4441')
+        c_classement_html = response.text
+
+    # Parse html
+    data_html = bs.BeautifulSoup(c_classement_html)
+
+    # Build rankings, points and team_name
+    rankings = [int(elt.text.split('(')[1].replace('e)', ''))
+                for elt in data_html.findAll('span', attrs={'class': 'equipe-points'})]
+    points = [(int(elt.text.split(' ')[0])) for elt in data_html.findAll('span', attrs={'class': 'equipe-points'})]
+    team_name = [team.text.split('. ')[1] for team in data_html.findAll('span', attrs={'class': 'equipe-nom'})]
+
+    # Build result dictionary
+    data = {team: {'points': point, 'classement': classement} for team, point, classement in zip(team_name, points, rankings)}
+
+    return data
 
 if __name__ == "__main__":
-    
+
     PARSER = argparse.ArgumentParser(description='Suivi des points pour la Fantasy League')
     PARSER.add_argument('-l', default='', action="store_true",
                         help='Liste les joueurs')
@@ -110,5 +141,3 @@ if __name__ == "__main__":
         save_results(NEW)
     else:
         PARSER.print_help()
-
-

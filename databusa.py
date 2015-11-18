@@ -8,17 +8,8 @@ import colorama
 import BeautifulSoup as bs
 from requests import session
 
+import config
 
-######### PLACE YOUR CONFIG HERE ##########
-
-EMAIL       = "hayato11@hotmail.fr"
-PLAYER_NAME = "The Answer"
-
-RES_FILE           = "/home/gburet/.fantasy/res.txt"
-BACKUP_RES_FILE    = "/home/gburet/.fantasy/backup_res.txt"
-
-
-######### END OF CONFIG - START CODE ##########
 
 DATE_LABEL   = "Date"
 PLAYER_LABEL = "Players"
@@ -102,7 +93,10 @@ class Results(object):
         self.all_daily_results = {}
 
     @classmethod
-    def json_loader(cls, path=RES_FILE):
+    def json_loader(cls, path=None):
+        if path is None:
+            path = config.RES_FILE
+        
         with open(path) as json_file:
             data = json_file.read()
         all_results = json.loads(data)
@@ -146,10 +140,10 @@ class Results(object):
         for player_id, player_name in enumerate(daily_results.get_player_names_sorted()):
             info = BACK_BLUE + ' ' + ENDC + ' '
             res  = str(player_id+1) + ". " + player_name.ljust(16) + " : " + str(daily_results.get_score_for_player(player_name))
-            if player_name == PLAYER_NAME:
+            if player_name == config.PLAYER_NAME:
                 res = BACK_CYAN + res + ENDC
             else:
-                res += diff_score(daily_results.get_score_for_player(player_name), daily_results.get_score_for_player(PLAYER_NAME))
+                res += diff_score(daily_results.get_score_for_player(player_name), daily_results.get_score_for_player(config.PLAYER_NAME))
             info += res.ljust(LINE_LEN-2+2*6) + BACK_BLUE + ' ' + ENDC
 
             print info
@@ -165,11 +159,11 @@ class Results(object):
         for player_id, player_name in enumerate(current_results.get_player_names_sorted()):
             info = BACK_BLUE + ' ' + ENDC + ' '
             res  = str(player_id+1) + ". " + player_name.ljust(16) + " : " + str(current_results.get_score_for_player(player_name))
-            if player_name == PLAYER_NAME:
+            if player_name == config.PLAYER_NAME:
                 res = BACK_CYAN + res + ENDC + "      "
             else:
                 res += diff_score(current_results.get_score_for_player(player_name),
-                                  current_results.get_score_for_player(PLAYER_NAME))
+                                  current_results.get_score_for_player(config.PLAYER_NAME))
             res += "   (+{})".format(current_results.get_score_for_player(player_name) - old_results.get_score_for_player(player_name))
             info += res.ljust(LINE_LEN-2+2*6) + BACK_BLUE + ' ' + ENDC
 
@@ -205,8 +199,8 @@ class Results(object):
                 dico[key] = {self.DATE_LABEL   : self.all_daily_results[key].get_date(),
                              self.PLAYER_LABEL : self.all_daily_results[key].get_results()}
 
-            shutil.copy(RES_FILE, BACKUP_RES_FILE)
-            with open(RES_FILE, 'w') as f:
+            shutil.copy(config.RES_FILE, config.BACKUP_RES_FILE)
+            with open(config.RES_FILE, 'w') as f:
                 f.write(json.dumps(dico))
 
             print "results saved !"
@@ -220,7 +214,7 @@ class Results(object):
         """
         password = getpass.getpass()
         payload = {'logmod': '1',
-                   'FrmEma': EMAIL,
+                   'FrmEma': config.EMAIL,
                    'FrmPas': password}
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
@@ -246,7 +240,7 @@ class Results(object):
         """
         password = getpass.getpass()
         payload = {'logmod': '1',
-                   'FrmEma': EMAIL,
+                   'FrmEma': config.EMAIL,
                    'FrmPas': password}
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
@@ -269,7 +263,7 @@ class Results(object):
         """
         password = getpass.getpass()
         payload = {'logmod': '1',
-                   'FrmEma': EMAIL,
+                   'FrmEma': config.EMAIL,
                    'FrmPas': password}
 
         with session() as c_session:

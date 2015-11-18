@@ -3,6 +3,7 @@
 *.log
 *.settings
 *.swp
+config.py
 .pydevproject
 .idea
 .project

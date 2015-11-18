@@ -228,7 +228,7 @@ class Results(object):
         players = roster_parsed.findAll('span', attrs={'class': 'nom'})
         evals = roster_parsed.findAll('span', attrs={'class': 'annexe'})
 
-        res = ['%s: %s' % (player.text.replace('&nbsp;', ' ').ljust(24, ' '), c_eval.text)
+        res = ['{}: {}'.format(player.text.replace('&nbsp;', ' ').ljust(24, ' '), c_eval.text)
               for player, c_eval in zip(players, evals)]
 
         print '\n'.join(res)

@@ -187,6 +187,32 @@ class Results(object):
         else:
             print "results not saved"
 
+    def get_current_team_from_busa(self):
+        """
+            Get current team
+            return a dict
+        """
+        password = getpass.getpass()
+        payload = {'logmod': '1',
+                   'FrmEma': EMAIL,
+                   'FrmPas': password}
+        with session() as c_session:
+            c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
+            roster = c_session.get('http://fantasy.2ics.net/asp/mai_rosters/ros_lst.asp')
+            roster_html = roster.text
+
+        # Parse html page
+        roster_parsed = bs.BeautifulSoup(roster_html)
+
+        # Get current player name
+        players = roster_parsed.findAll('span', attrs={'class': 'nom'})
+        evals = roster_parsed.findAll('span', attrs={'class': 'annexe'})
+
+        res = ['%s: %s' % (player.text.replace('&nbsp;', ' '), c_eval.text)
+              for player, c_eval in zip(players, evals)]
+
+        return '\n'.join(res)
+
     def get_current_player_name_from_busa(self):
         """
             Get current player team name

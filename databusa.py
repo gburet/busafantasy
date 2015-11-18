@@ -90,7 +90,7 @@ class DailyResults(object):
         return self.date
 
     def get_score_for_player(self, player_name):
-        return self.get_results().get(player_name, None)
+        return self.get_results().get(player_name)
 
 
 class Results(object):

@@ -3,14 +3,7 @@
 This is a tool that helps following points on Basket USA Fantasy League 
 
 This tool has to be launched in command line. Hereunder are some arguments to use it :
-*      show this help message and exit
-*    `-l`          
-*    `-s`          
-*    `-d`          
-*    `-c <date>`        
-*    `-p`          Plot results
-*    `-t`          Get team of the weak
-  
+
 Argument  | Description
 ------------- | -------------
 `-h`  | Print help

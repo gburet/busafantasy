@@ -8,7 +8,6 @@ import argparse
 import colorama
 import BeautifulSoup as bs
 from requests import session
-import matplotlib.pyplot as plt
 
 
 ######### PLACE YOUR CONFIG HERE ##########
@@ -306,6 +305,7 @@ class Results(object):
      
     # Print players in a given order
     def plot_results(self):
+        import matplotlib.pyplot as plt
         plots = []
         player_names = self.get_player_names_sorted()
         for name in player_names:
@@ -328,7 +328,8 @@ if __name__ == "__main__":
     PARSER.add_argument('-p', default='', action="store_true", help='Plot results')
     PARSER.add_argument('-t', default='', action="store_true", help='Get team of the weak')
     ARGS = PARSER.parse_args()
-
+    
+    
     R=Results.json_loader()
 
     if ARGS.l != '':

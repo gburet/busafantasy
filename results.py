@@ -216,7 +216,7 @@ class Results(object):
     
         last_index = self.get_last_date_index()
         self.all_daily_results[str(int(last_index)+1)] = DailyResults(data, None)
-        self.print_results()
+        self.print_players_and_evolution(last_index)
         
 
 
@@ -237,6 +237,7 @@ if __name__ == "__main__":
         R.save_results()
     elif ARGS.d != '':
         R.get_results_from_busa()
+        R.save_results()
     else:
         PARSER.print_help()
 

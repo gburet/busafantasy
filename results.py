@@ -236,10 +236,10 @@ class Results(object):
         players = roster_parsed.findAll('span', attrs={'class': 'nom'})
         evals = roster_parsed.findAll('span', attrs={'class': 'annexe'})
 
-        res = ['%s: %s' % (player.text.replace('&nbsp;', ' '), c_eval.text)
+        res = ['%s: %s' % (player.text.replace('&nbsp;', ' ').ljust(24, ' '), c_eval.text)
               for player, c_eval in zip(players, evals)]
 
-        return '\n'.join(res)
+        print '\n'.join(res)
 
     def get_current_player_name_from_busa(self):
         """
@@ -326,6 +326,7 @@ if __name__ == "__main__":
     PARSER.add_argument('-d', default='', action="store_true", help='Get results from Basket USA')
     PARSER.add_argument('-c', default='', help='Compare results with a date')
     PARSER.add_argument('-p', default='', action="store_true", help='Plot results')
+    PARSER.add_argument('-t', default='', action="store_true", help='Get team of the weak')
     ARGS = PARSER.parse_args()
 
     R=Results.json_loader()
@@ -342,5 +343,7 @@ if __name__ == "__main__":
         R.compare_results_with_date(ARGS.c)
     elif ARGS.p != '':
         R.plot_results()
+    elif ARGS.t != '':
+        R.get_current_team_from_busa()
     else:
         PARSER.print_help()

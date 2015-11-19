@@ -7,6 +7,7 @@ import getpass
 import colorama
 import BeautifulSoup as bs
 from requests import session
+import datetime
 
 import config
 
@@ -96,7 +97,7 @@ class Results(object):
     def json_loader(cls, path=None):
         if path is None:
             path = config.RES_FILE
-        
+
         with open(path) as json_file:
             data = json_file.read()
         all_results = json.loads(data)
@@ -207,6 +208,49 @@ class Results(object):
         else:
             print "results not saved"
 
+    def get_buddy_team(self, team_name):
+        """
+        Explore weekly rankings to get buddies teams
+        return team
+        """
+        password = getpass.getpass()
+        payload = {'logmod': '1',
+                   'FrmEma': config.EMAIL,
+                   'FrmPas': password}
+        current_week = datetime.date.today().isocalendar()[1]
+        busa_week = current_week - 19  # Magic
+
+        with session() as c_session:
+            c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
+            weekly_ranking = []
+            ranking_available = True
+            page_index = 0
+            while True:
+                weekly_ranking_url = '{0}{1}{2}{3}'.format('http://fantasy.2ics.net/asp/mai_classement/cla_sem_lst.asp?perid=',
+                                                            busa_week,
+                                                            '&rchmod=0&rchmot=&rchmoi=&rchann=&rchsec=0&rchzon=0&rchpos=',
+                                                            page_index)
+                c_ranking = c_session.get(weekly_ranking_url)
+                c_ranking_html = c_ranking.text
+                print 'Browsing busa ranking page {0}...'.format(page_index)
+                if 'pts' in c_ranking_html:  # Ensure ranking page is available
+                    if team_name in c_ranking_html:
+                        c_ranking_parsed = bs.BeautifulSoup(c_ranking_html)
+                        teams = [team.text.split('. ')[1]
+                                 for team in c_ranking_parsed.findAll('span', attrs={'class': 'equipe-nom'})]
+                        rosters = [elt.text.replace('&nbsp;', '')
+                                   for elt in c_ranking_parsed.findAll('li') if elt.text.startswith('&nbsp')]
+
+                        result = {team: rosters[6 * index: 6 * (index + 1)] for index, team in enumerate(teams)}
+                        print BACK_BLUE + '\n'.join(result.get(team_name)) + ENDC
+                        break
+                    else:
+                        page_index += 1
+                        continue
+                else:
+                    print '{0} team not found'.format(team_name)
+                    break
+
     def get_current_team_from_busa(self):
         """
             Get current team
@@ -295,7 +339,7 @@ class Results(object):
             self.print_players_and_evolution(date_index)
         else:
             print "No results for this date: {}".format(date)
-     
+
     # Print players in a given order
     def plot_results(self):
         import matplotlib.pyplot as plt
@@ -309,4 +353,3 @@ class Results(object):
 
         plt.legend(handles=plots, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0.)
         plt.show()
-

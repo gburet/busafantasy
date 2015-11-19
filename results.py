@@ -13,9 +13,10 @@ if __name__ == "__main__":
     PARSER.add_argument('-c', default='', help='Compare results with a date')
     PARSER.add_argument('-p', default='', action="store_true", help='Plot results')
     PARSER.add_argument('-t', default='', action="store_true", help='Get team of the weak')
+    PARSER.add_argument('-b', default='', help='Get buddy roster')
     ARGS = PARSER.parse_args()
-    
-    
+
+
     R=databusa.Results.json_loader()
 
     if ARGS.l != '':
@@ -32,5 +33,7 @@ if __name__ == "__main__":
         R.plot_results()
     elif ARGS.t != '':
         R.get_current_team_from_busa()
+    elif ARGS.b != '':
+        R.get_buddy_team(ARGS.b)
     else:
         PARSER.print_help()

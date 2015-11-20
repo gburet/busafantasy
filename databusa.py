@@ -229,6 +229,9 @@ class Results(object):
         current_week = datetime.date.today().isocalendar()[1]
         busa_week = current_week - 19  # Magic
 
+        if team_name == self.get_current_player_name_from_busa():
+            return self.get_current_team_from_busa()
+
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
             weekly_ranking = []
@@ -283,7 +286,7 @@ class Results(object):
         res = ['{}: {}'.format(player.text.replace('&nbsp;', ' ').ljust(24, ' '), c_eval.text)
               for player, c_eval in zip(players, evals)]
 
-        print '\n'.join(res)
+        print BACK_BLUE + '\n'.join(res) + ENDC
 
     def get_current_player_name_from_busa(self):
         """

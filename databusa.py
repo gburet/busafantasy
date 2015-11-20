@@ -263,7 +263,8 @@ class Results(object):
                     print '{0} team not found'.format(team_name)
                     break
 
-    def get_current_team_from_busa(self):
+    @staticmethod
+    def get_current_team_from_busa():
         """
             Get current team
             return a dict
@@ -288,7 +289,8 @@ class Results(object):
 
         print BACK_BLUE + '\n'.join(res) + ENDC
 
-    def get_current_player_name_from_busa(self):
+    @staticmethod
+    def get_current_player_name_from_busa():
         """
             Get current player team name
             return a string
@@ -363,7 +365,7 @@ class Results(object):
             print "No results for this date: {}".format(date)
 
     # Print players in a given order
-    def plot_results(self, plotlib='matplot'):
+    def plot_results(self):
         import matplotlib.pyplot as plt
         import plotly.plotly as py
         import plotly.graph_objs as go

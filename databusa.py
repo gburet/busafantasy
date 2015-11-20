@@ -328,7 +328,20 @@ class Results(object):
         data = {team : point for team, point, _ in zip(team_name, points, rankings)}
 
         last_index = self.get_last_date_index()
-        self.all_daily_results[str(int(last_index)+1)] = DailyResults(data, None)
+
+        # Get current date
+        d = datetime.datetime.now()
+        c_date = '{0}/{1}/{2}'.format(d.day, d.month, d.year)
+
+        # Fill current results in all_daily_results dict
+        index = str(int(last_index)+1)
+        for key, value in self.all_daily_results.iteritems():
+            # Override a daily result with same date
+            if c_date == self.all_daily_results[key].date:
+                index = key
+                break
+
+        self.all_daily_results[index] = DailyResults(data, c_date)
         self.print_players_and_evolution(last_index)
 
 
@@ -341,15 +354,24 @@ class Results(object):
             print "No results for this date: {}".format(date)
 
     # Print players in a given order
-    def plot_results(self):
+    def plot_results(self, plotlib='matplot'):
         import matplotlib.pyplot as plt
+        import plotly.plotly as py
+        import plotly.graph_objs as go
+
         plots = []
+        plots_py = []
         player_names = self.get_player_names_sorted()
         for name in player_names:
             player_evolution = self.get_player_evolution(name)
-            indexes          = [int(i) for i in player_evolution]
+            indexes    = [int(i) for i in player_evolution]
+            indexes_py = [str(self.all_daily_results[d].get_date()) for d in player_evolution.keys()]
             indexes.sort()
-            plots.extend(plt.plot(indexes, [player_evolution[str(i)] for i in indexes], Color.get_color(), label=name))
+            indexes_py.sort()
+            y_axis_data = [player_evolution[str(i)] for i in indexes]
+            plots.extend(plt.plot(indexes, y_axis_data, Color.get_color(), label=name))
+            plots_py.append(go.Scatter(x=indexes_py, y=y_axis_data, mode='lines+markers', name=name))
 
+        py.plot(plots_py, filename='busa')
         plt.legend(handles=plots, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0.)
         plt.show()

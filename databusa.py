@@ -8,9 +8,19 @@ import colorama
 import BeautifulSoup as bs
 from requests import session
 import datetime
+import base64
 
 import config
 
+try:
+    from config import PASSWORD
+    PASSWORD = base64.b64decode(PASSWORD)
+except ImportError:
+    PASSWORD = getpass.getpass()
+    with open('config.py', 'a') as CONFIG_FILE:
+        CRYPTED_PWD = base64.b64encode(PASSWORD)
+        PWD_LINE = 'PASSWORD="{0}"'.format(CRYPTED_PWD)
+        CONFIG_FILE.write(PWD_LINE)
 
 DATE_LABEL   = "Date"
 PLAYER_LABEL = "Players"
@@ -213,10 +223,9 @@ class Results(object):
         Explore weekly rankings to get buddies teams
         return team
         """
-        password = getpass.getpass()
         payload = {'logmod': '1',
                    'FrmEma': config.EMAIL,
-                   'FrmPas': password}
+                   'FrmPas': PASSWORD}
         current_week = datetime.date.today().isocalendar()[1]
         busa_week = current_week - 19  # Magic
 
@@ -256,10 +265,9 @@ class Results(object):
             Get current team
             return a dict
         """
-        password = getpass.getpass()
         payload = {'logmod': '1',
                    'FrmEma': config.EMAIL,
-                   'FrmPas': password}
+                   'FrmPas': PASSWORD}
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
             roster = c_session.get('http://fantasy.2ics.net/asp/mai_rosters/ros_lst.asp')
@@ -282,10 +290,9 @@ class Results(object):
             Get current player team name
             return a string
         """
-        password = getpass.getpass()
         payload = {'logmod': '1',
                    'FrmEma': config.EMAIL,
-                   'FrmPas': password}
+                   'FrmPas': PASSWORD}
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
             roster = c_session.get('http://fantasy.2ics.net/asp/mai_rosters/ros_lst.asp')
@@ -305,10 +312,9 @@ class Results(object):
             Get teams, rankings, points from busa
             Return a dict
         """
-        password = getpass.getpass()
         payload = {'logmod': '1',
                    'FrmEma': config.EMAIL,
-                   'FrmPas': password}
+                   'FrmPas': PASSWORD}
 
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)

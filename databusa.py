@@ -9,9 +9,6 @@ import BeautifulSoup as bs
 from requests import session
 import datetime
 import base64
-import plotly.plotly as py
-import plotly.graph_objs as go
-import matplotlib.pyplot as plt
 
 import config
 
@@ -296,7 +293,7 @@ class Results(object):
         players = roster_parsed.findAll('span', attrs={'class': 'nom'})
         evals = roster_parsed.findAll('span', attrs={'class': 'annexe'})
 
-        res = ['{}: {}'.format(player.text.replace('&nbsp;', ' ').ljust(24, ' '), c_eval.text)
+        res = ['{0}: {1}'.format(player.text.replace('&nbsp;', ' ').ljust(24, ' '), c_eval.text)
               for player, c_eval in zip(players, evals)]
 
         print BACK_BLUE + '\n'.join(res) + ENDC
@@ -382,6 +379,8 @@ class Results(object):
         Plot historical ranking
         """
         #plots = []
+        import plotly.plotly as py
+        import plotly.graph_objs as go
         plots_py = []
         player_names = self.get_player_names_sorted()
         for name in player_names:

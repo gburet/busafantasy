@@ -9,8 +9,12 @@ import BeautifulSoup as bs
 from requests import session
 import datetime
 import base64
+import plotly.plotly as py
+import plotly.graph_objs as go
+import matplotlib.pyplot as plt
 
 import config
+
 
 try:
     from config import PASSWORD
@@ -132,6 +136,16 @@ class Results(object):
                 return date_index
         return None
 
+    def get_last_sunday_index(self):
+        """
+        @return: index of the last sunday index in res file
+        """
+        today = datetime.date.today()
+        last_sunday = today - datetime.timedelta(days=-today.weekday(), weeks=1) + datetime.timedelta(days=6, weeks=0)
+        last_sunday_str = '{0}/{1}/{2}'.format(last_sunday.day, last_sunday.month ,last_sunday.year)
+        return str([key for key in self.all_daily_results.keys()
+                    if self.all_daily_results[key].get_date() == last_sunday_str][0])
+
     # Print players in a given order
     def get_player_evolution(self, player_name):
         evolution = {}
@@ -145,21 +159,17 @@ class Results(object):
     def print_results(self, date_index=None):
         if date_index is None:
             date_index = self.get_last_date_index()
-
         print BACK_BLUE + ' '*LINE_LEN + ENDC
         daily_results = self.all_daily_results[date_index]
         for player_id, player_name in enumerate(daily_results.get_player_names_sorted()):
-            info = BACK_BLUE + ' ' + ENDC + ' '
             res  = str(player_id+1) + ". " + player_name.ljust(16) + " : " + str(daily_results.get_score_for_player(player_name))
             if player_name == config.PLAYER_NAME:
                 res = BACK_CYAN + res + ENDC
             else:
-                res += diff_score(daily_results.get_score_for_player(player_name), daily_results.get_score_for_player(config.PLAYER_NAME))
-            info += res.ljust(LINE_LEN-2+2*6) + BACK_BLUE + ' ' + ENDC
-
-            print info
+                res += diff_score(daily_results.get_score_for_player(player_name),
+                                  daily_results.get_score_for_player(config.PLAYER_NAME))
+            print res
         print BACK_BLUE + ' '*LINE_LEN + ENDC
-
 
     # Print players in a given order
     def print_players_and_evolution(self, old_index):
@@ -234,8 +244,6 @@ class Results(object):
 
         with session() as c_session:
             c_session.post('http://fantasy.2ics.net/asp/mai_utilisateurs/log_mod.asp', data=payload)
-            weekly_ranking = []
-            ranking_available = True
             page_index = 0
             while True:
                 weekly_ranking_url = '{0}{1}{2}{3}'.format('http://fantasy.2ics.net/asp/mai_classement/cla_sem_lst.asp?perid=',
@@ -254,7 +262,8 @@ class Results(object):
                                    for elt in c_ranking_parsed.findAll('li') if elt.text.startswith('&nbsp')]
 
                         result = {team: rosters[6 * index: 6 * (index + 1)] for index, team in enumerate(teams)}
-                        print BACK_BLUE + '\n'.join(result.get(team_name)) + ENDC
+
+                        print BACK_BLUE + '\n'.join(result.get(team_name, [])) + ENDC
                         break
                     else:
                         page_index += 1
@@ -364,13 +373,19 @@ class Results(object):
         else:
             print "No results for this date: {}".format(date)
 
-    # Print players in a given order
-    def plot_results(self):
-        import matplotlib.pyplot as plt
-        import plotly.plotly as py
-        import plotly.graph_objs as go
 
-        plots = []
+    def weekly_ranking(self):
+        """
+        return: current week ranking
+        """
+
+
+
+    def plot_results(self):
+        """
+        Plot historical ranking
+        """
+        #plots = []
         plots_py = []
         player_names = self.get_player_names_sorted()
         for name in player_names:
@@ -380,9 +395,20 @@ class Results(object):
             indexes.sort()
             indexes_py.sort()
             y_axis_data = [player_evolution[str(i)] for i in indexes]
-            plots.extend(plt.plot(indexes, y_axis_data, Color.get_color(), label=name))
+            #plots.extend(plt.plot(indexes, y_axis_data, Color.get_color(), label=name))
             plots_py.append(go.Scatter(x=indexes_py, y=y_axis_data, mode='lines+markers', name=name))
 
-        py.plot(plots_py, filename='busa')
-        plt.legend(handles=plots, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0.)
-        plt.show()
+            layout = go.Layout(
+                title='Basket USA Fantasy historic',
+                xaxis=dict(title='',
+                           titlefont=dict(family='Courier New, monospace', size=18, color='#7f7f7f')
+                           ),
+                yaxis=dict(title='Pts',
+                           titlefont=dict(family='Courier New, monospace', size=18, color='#7f7f7f')
+                           )
+            )
+
+        fig = go.Figure(data=plots_py, layout=layout)
+        py.plot(fig, filename='busa')
+        #plt.legend(handles=plots, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0.)
+        #plt.show()

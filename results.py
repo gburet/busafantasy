@@ -14,6 +14,7 @@ if __name__ == "__main__":
     PARSER.add_argument('-p', default='', action="store_true", help='Plot results')
     PARSER.add_argument('-t', default='', action="store_true", help='Get team of the weak')
     PARSER.add_argument('-b', default='', help='Get buddy roster')
+    PARSER.add_argument('-w', default='', action="store_true", help='Weekly ranking')
     ARGS = PARSER.parse_args()
 
 
@@ -35,5 +36,7 @@ if __name__ == "__main__":
         R.get_current_team_from_busa()
     elif ARGS.b != '':
         R.get_buddy_team(ARGS.b)
+    elif ARGS.w != '':
+        R.print_players_and_evolution(R.get_last_sunday_index())
     else:
         PARSER.print_help()

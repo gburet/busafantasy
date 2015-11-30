@@ -143,8 +143,11 @@ class Results(object):
         today = datetime.date.today()
         last_sunday = today - datetime.timedelta(days=-today.weekday(), weeks=1) + datetime.timedelta(days=6, weeks=0)
         last_sunday_str = '{0}/{1}/{2}'.format(last_sunday.day, last_sunday.month ,last_sunday.year)
-        return str([key for key in self.all_daily_results.keys()
-                    if self.all_daily_results[key].get_date() == last_sunday_str][0])
+        try:
+            return str([key for key in self.all_daily_results.keys()
+                        if self.all_daily_results[key].get_date() == last_sunday_str][0])
+        except IndexError:
+            return self.get_last_date_index()
 
     # Print players in a given order
     def get_player_evolution(self, player_name):
@@ -372,13 +375,6 @@ class Results(object):
             self.print_players_and_evolution(date_index)
         else:
             print "No results for this date: {}".format(date)
-
-
-    def weekly_ranking(self):
-        """
-        return: current week ranking
-        """
-
 
 
     def plot_results(self):

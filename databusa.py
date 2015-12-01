@@ -138,8 +138,9 @@ class Results(object):
         @return: index of the last sunday index in res file
         """
         today = datetime.date.today()
-        last_sunday = today - datetime.timedelta(days=-today.weekday(), weeks=1) + datetime.timedelta(days=6, weeks=0)
+        last_sunday = today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(days=6, weeks=-1)
         last_sunday_str = '{0}/{1}/{2}'.format(last_sunday.day, last_sunday.month ,last_sunday.year)
+        print last_sunday_str
         try:
             return str([key for key in self.all_daily_results.keys()
                         if self.all_daily_results[key].get_date() == last_sunday_str][0])

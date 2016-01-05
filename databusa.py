@@ -238,8 +238,8 @@ class Results(object):
                    'FrmEma': config.EMAIL,
                    'FrmPas': PASSWORD}
         current_week = datetime.date.today().isocalendar()[1]
-        busa_week = current_week - 19  # Magic
-
+        busa_week = current_week + 34  # Magic
+        print busa_week
         if team_name == self.get_current_player_name_from_busa():
             return self.get_current_team_from_busa()
 
@@ -256,6 +256,7 @@ class Results(object):
                 print 'Browsing busa ranking page {0}...'.format(page_index)
                 if 'pts' in c_ranking_html:  # Ensure ranking page is available
                     if team_name in c_ranking_html:
+                        print team_name
                         c_ranking_parsed = bs.BeautifulSoup(c_ranking_html)
                         teams = [team.text.split('. ')[1]
                                  for team in c_ranking_parsed.findAll('span', attrs={'class': 'equipe-nom'})]
